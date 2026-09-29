@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Personal Developer Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,12 +13,37 @@
   <!-- HEADER / NAV -->
   <header class="site-header">
     <div class="sheet-frame">
+      <a href="#hero" class="wordmark">PDP</a>
+
       <nav class="site-nav" aria-label="Primary">
         <a href="#about">About</a>
         <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
       </nav>
+
+      <button
+        class="nav-toggle"
+        id="navToggle"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobileDrawer"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
   </header>
+
+  <!-- MOBILE DRAWER -->
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+  <nav class="mobile-drawer" id="mobileDrawer" aria-label="Mobile" aria-hidden="true">
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#projects">Projects</a>
+    <a href="#contact">Contact</a>
+  </nav>
 
   <main>
 
@@ -24,7 +51,7 @@
     <section id="hero" class="hero sheet-frame">
       <h1 class="hero-title">Personal Developer Portfolio</h1>
       <p class="hero-sub">
-       Hello! I'm Ernestina,a developer passionate about building responsive websites.
+      Hi, I'm Tina. I'm learning to build for the web from first principles, starting with semantic HTML and CSS, and working my way up to JavaScript and beyond.
       </p>
     </section>
 
@@ -33,11 +60,14 @@
       <div class="about-text">
         <h2>About</h2>
         <p>
-          I'm learning to build for the web from first principles
-          starting with the structure a browser actually understands.
+          I'm learning to build for the web from first principles —
+          starting with the structure a browser actually understands,
+          then layering on style and layout with intent rather than guesswork.
         </p>
         <p>
-          This page is the first part of my portfolio, and it will grow as I learn more about web development.
+          This page is the first shipped piece of that process: every
+          section below is hand-built with semantic HTML and CSS, no
+          frameworks doing the thinking for me yet.
         </p>
       </div>
     </section>
@@ -48,12 +78,12 @@
       <ul class="skills-grid">
         <li class="skill-card is-done">
           <span class="skill-marker" aria-hidden="true"></span>
-          <h3>HTML</h3>
+          <h3>Semantic HTML</h3>
           <p>Structuring content with the right element for the job.</p>
         </li>
         <li class="skill-card">
           <span class="skill-marker" aria-hidden="true"></span>
-          <h3>CSS</h3>
+          <h3>CSS &amp; the box model</h3>
           <p>Margin, border, padding, content — and how they interact.</p>
         </li>
         <li class="skill-card">
@@ -74,11 +104,67 @@
       </ul>
     </section>
 
+    <!-- PROJECTS -->
+    <section id="projects" class="projects sheet-frame">
+      <h2>Projects</h2>
+      <p class="section-lede">A few things I've built while working through this course.</p>
+
+      <div class="projects-grid">
+        <article class="project-card">
+          <h3>Elveelia Medspa</h3>
+          <p>A website for a medical spa business, covering services, booking info, and site navigation.</p>
+          <a href="https://github.com/TinaCode-b/ElveeliaMedspa" class="project-link">View repo →</a>
+        </article>
+
+        <article class="project-card">
+          <h3>CineSynapse Studio</h3>
+          <p>A film/media studio site built to explore layout and visual presentation for a creative brand.</p>
+          <a href="https://github.com/TinaCode-b/CineSynapseStudio" class="project-link">View repo →</a>
+        </article>
+
+        <article class="project-card">
+          <h3>Chronicle</h3>
+          <p>A journaling/blog-style project focused on presenting written content clearly and readably.</p>
+          <a href="https://github.com/TinaCode-b/Chronicle" class="project-link">View repo →</a>
+        </article>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="contact sheet-frame">
+      <h2>Contact</h2>
+      <p class="section-lede">Have a question or want to collaborate? Send a message.</p>
+
+      <form id="contactForm" class="contact-form" novalidate>
+        <div class="form-field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" autocomplete="name">
+          <span class="field-error" id="nameError"></span>
+        </div>
+
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email">
+          <span class="field-error" id="emailError"></span>
+        </div>
+
+        <div class="form-field">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="5"></textarea>
+          <span class="field-error" id="messageError"></span>
+        </div>
+
+        <button type="submit" class="submit-btn">Send message</button>
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
   </main>
 
   <footer class="site-footer sheet-frame">
-    <p>&copy; 2026 Boakye Ernestina Dankwah.All rights reserved.</p>
+    <p>Built by Tina.</p>
   </footer>
 
+  <script src="script.js"></script>
 </body>
 </html>
