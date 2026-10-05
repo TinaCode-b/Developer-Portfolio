@@ -89,6 +89,13 @@ a {
   color: var(--accent);
 }
 
+/* NavLink from react-router-dom adds this class automatically
+   when the link matches the current route. */
+.site-nav a.is-active,
+.mobile-drawer a.is-active {
+  color: var(--accent);
+}
+
 /* ---------- Hero ---------- */
 .hero {
   padding-top: clamp(3rem, 8vw, 6rem);
@@ -150,8 +157,7 @@ a {
   gap: 0.5rem;
 }
 
-.skill-card h3::before {
-  content: "";
+.skill-dot {
   display: inline-block;
   width: 0.6rem;
   height: 0.6rem;
@@ -160,7 +166,7 @@ a {
   flex-shrink: 0;
 }
 
-.skill-card.is-done h3::before {
+.skill-dot.is-done {
   background: var(--accent);
 }
 
@@ -306,6 +312,21 @@ a {
   font-family: var(--font-head);
   font-size: 0.9rem;
   text-decoration: none;
+}
+
+.project-lang {
+  font-family: var(--font-head);
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin: 0.25rem 0 0 0;
+}
+
+.projects-status {
+  margin-top: var(--gap-md);
+}
+
+.projects-status.is-error {
+  color: #b3403c;
 }
 
 /* ---------- Contact ---------- */
