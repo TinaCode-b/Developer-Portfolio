@@ -14,7 +14,10 @@ export default function Home() {
   return (
     <>
       <section className="hero sheet-frame">
-        <h1 className="hero-title">Personal Developer Portfolio</h1>
+        <span className="hero-kicker">Sprint 03 · React rebuild</span>
+        <h1 className="hero-title">
+          Personal <span className="accent">Developer</span> Portfolio
+        </h1>
         <p className="hero-sub">
           Now rebuilt in React: components, state, routing, and a live feed
           of my GitHub projects — instead of one static HTML file.
