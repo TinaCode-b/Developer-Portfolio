@@ -1,86 +1,84 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import ProjectCard from '../components/ProjectCard.jsx';
+import useGithubRepos from '../hooks/useGithubRepos.js';
 import usePageTitle from '../hooks/usePageTitle.js';
-
-const GITHUB_USERNAME = 'TinaCode-b';
+import { SITE } from '../data/site.js';
 
 export default function Projects() {
-  usePageTitle('Projects');
+  usePageTitle('Projects', 'Public repositories from GitHub, loaded live through the GitHub REST API.');
 
-  // Three pieces of state: the data itself, whether we're still loading,
-  // and whether something went wrong. Each one drives a different part
-  // of the UI below.
-  const [repos, setRepos] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { status, repos, error, retry } = useGithubRepos(SITE.githubUser);
+  const [language, setLanguage] = useState('All');
 
-  // useEffect with an empty dependency array ([]) means: run this once,
-  // right after the component first renders — this is the React
-  // equivalent of "when the page loads, go fetch the data."
-  useEffect(() => {
-    async function fetchRepos() {
-      try {
-        const response = await fetch(
-          `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=12`
-        );
+  const languages = useMemo(
+    () => ['All', ...[...new Set(repos.map((r) => r.language).filter(Boolean))].sort()],
+    [repos]
+  );
+  const visible = language === 'All' ? repos : repos.filter((r) => r.language === language);
 
-        if (!response.ok) {
-          throw new Error(`GitHub API responded with ${response.status}`);
-        }
-
-        const data = await response.json();
-        setRepos(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchRepos();
-  }, []);
+  let statusText = '';
+  if (status === 'loading') statusText = 'Loading projects from GitHub…';
+  if (status === 'success') statusText = `Showing ${visible.length} of ${repos.length} projects.`;
 
   return (
-    <section className="projects sheet-frame">
-      <h2>Projects</h2>
-      <p className="section-lede">
-        Live from my GitHub — pulled dynamically via the GitHub REST API.
+    <section className="page container" aria-labelledby="projects-title">
+      <h1 id="projects-title">Projects</h1>
+      <p className="lead">
+        Public repositories from my GitHub account, loaded live through the GitHub REST API.
       </p>
 
-      {/* role="status" + aria-live="polite" means a screen reader
-          announces this text whenever it changes, even though focus
-          stays wherever the user already was — important here because
-          fetching happens automatically, with no user-initiated action
-          like a button click to anchor the announcement to. */}
-      {isLoading && (
-        <p className="projects-status" role="status" aria-live="polite">
-          Loading repositories…
-        </p>
+      {status === 'success' && languages.length > 2 && (
+        <div className="chips" role="group" aria-label="Filter projects by language">
+          {languages.map((lang) => (
+            <button
+              key={lang}
+              type="button"
+              className="chip"
+              aria-pressed={language === lang}
+              onClick={() => setLanguage(lang)}
+            >
+              {lang}
+            </button>
+          ))}
+        </div>
       )}
 
-      {error && (
-        <p className="projects-status is-error" role="status" aria-live="polite">
-          Couldn't load projects right now ({error}).
-        </p>
+      <p className="status-line" role="status" aria-live="polite">
+        {statusText}
+      </p>
+
+      {status === 'loading' && (
+        <ul className="project-grid" aria-hidden="true">
+          {Array.from({ length: 6 }, (_, i) => (
+            <li key={i} className="project project--skeleton">
+              <span className="skeleton skeleton--title" />
+              <span className="skeleton" />
+              <span className="skeleton skeleton--short" />
+            </li>
+          ))}
+        </ul>
       )}
 
-      {!isLoading && !error && repos.length === 0 && (
-        <p className="projects-status" role="status" aria-live="polite">
-          No public repositories found.
-        </p>
+      {status === 'error' && (
+        <div className="notice" role="alert">
+          <p>{error}</p>
+          <button type="button" className="btn btn--ghost" onClick={retry}>
+            Try again
+          </button>
+        </div>
       )}
 
-      <div className="projects-grid">
-        {repos.map((repo) => (
-          <ProjectCard
-            key={repo.id}
-            name={repo.name}
-            description={repo.description}
-            htmlUrl={repo.html_url}
-            language={repo.language}
-          />
-        ))}
-      </div>
+      {status === 'success' && repos.length === 0 && (
+        <p className="notice">No public projects yet. Check back soon.</p>
+      )}
+
+      {status === 'success' && visible.length > 0 && (
+        <ul className="project-grid">
+          {visible.map((repo) => (
+            <ProjectCard key={repo.id} repo={repo} />
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

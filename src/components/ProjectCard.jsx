@@ -1,19 +1,31 @@
-export default function ProjectCard({ name, description, htmlUrl, language }) {
+const dateFormat = new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric' });
+
+export default function ProjectCard({ repo }) {
+  const { name, description, url, homepage, language, pushedAt } = repo;
   return (
-    <article className="project-card">
-      <h3>{name}</h3>
-      <p>{description || 'No description provided.'}</p>
-      {language && <p className="project-lang">{language}</p>}
-      {/* Two a11y fixes here: screen reader users often scan a page by
-          jumping link-to-link, where identical "View repo →" text on
-          every card is ambiguous out of context — the sr-only span adds
-          the project name back in. And target="_blank" changes context
-          without warning, so we say so explicitly. */}
-      <a href={htmlUrl} target="_blank" rel="noreferrer" className="project-link">
-        View repo<span className="sr-only"> for {name}</span>
-        <span aria-hidden="true"> →</span>
-        <span className="sr-only"> (opens in a new tab)</span>
-      </a>
-    </article>
+    <li>
+      <article className="project">
+        <h3 className="project__name">{name}</h3>
+        <p className={`project__text${description ? '' : ' is-empty'}`}>
+          {description || 'No description on GitHub yet.'}
+        </p>
+        <p className="project__meta">
+          {language && <span className="tag">{language}</span>}
+          <span>
+            Updated <time dateTime={pushedAt}>{dateFormat.format(new Date(pushedAt))}</time>
+          </span>
+        </p>
+        <p className="project__links">
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            View code<span className="sr-only"> for {name} on GitHub (opens in a new tab)</span>
+          </a>
+          {homepage && (
+            <a href={homepage} target="_blank" rel="noopener noreferrer">
+              Live site<span className="sr-only"> for {name} (opens in a new tab)</span>
+            </a>
+          )}
+        </p>
+      </article>
+    </li>
   );
 }

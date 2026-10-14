@@ -1,131 +1,118 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import FormField from '../components/FormField.jsx';
 import usePageTitle from '../hooks/usePageTitle.js';
+import sendMessage from '../utils/sendMessage.js';
+import { validateAll, validateField } from '../utils/validate.js';
+import { SITE } from '../data/site.js';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function validate(values) {
-  const errors = {};
-  if (!values.name.trim()) errors.name = 'Please enter your name.';
-  if (!values.email.trim()) {
-    errors.email = 'Please enter your email.';
-  } else if (!EMAIL_PATTERN.test(values.email)) {
-    errors.email = 'Please enter a valid email address.';
-  }
-  if (values.message.trim().length < 10) {
-    errors.message = 'Message should be at least 10 characters.';
-  }
-  return errors;
-}
+const INITIAL = { name: '', email: '', message: '' };
 
 export default function Contact() {
-  usePageTitle('Contact');
+  usePageTitle('Contact', 'Have a question or want to collaborate? Send Ernestina a message.');
 
-  // One state object for all three fields, one for their errors,
-  // one for the submit status message.
-  const [values, setValues] = useState({ name: '', email: '', message: '' });
+  const [values, setValues] = useState(INITIAL);
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState(null); // null | 'success' | 'error'
+  const [touched, setTouched] = useState({});
+  const [status, setStatus] = useState('idle'); // idle | sending | sent | error
+  const refs = { name: useRef(null), email: useRef(null), message: useRef(null) };
 
-  function handleChange(event) {
-    const { name, value } = event.target;
-    // Spread the previous state, then overwrite just the one field —
-    // this is the standard way to update a single key in state.
-    setValues((prev) => ({ ...prev, [name]: value }));
-  }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setValues((v) => ({ ...v, [name]: value }));
+    if (status === 'sent') setStatus('idle');
+    // Once a field has been visited, re-validate as the person types.
+    if (touched[name]) setErrors((er) => ({ ...er, [name]: validateField(name, value) }));
+  };
 
-  function handleBlur(event) {
-    const { name } = event.target;
-    const fieldErrors = validate(values);
-    setErrors((prev) => ({ ...prev, [name]: fieldErrors[name] }));
-  }
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched((t) => ({ ...t, [name]: true }));
+    setErrors((er) => ({ ...er, [name]: validateField(name, value) }));
+  };
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const fieldErrors = validate(values);
-    setErrors(fieldErrors);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const found = validateAll(values);
+    setErrors(found);
+    setTouched({ name: true, email: true, message: true });
 
-    if (Object.keys(fieldErrors).length > 0) {
-      setStatus('error');
+    const firstInvalid = Object.keys(found)[0];
+    if (firstInvalid) {
+      setStatus('idle');
+      refs[firstInvalid].current?.focus();
       return;
     }
 
-    // No backend yet — this simulates a successful send.
-    setStatus('success');
-    setValues({ name: '', email: '', message: '' });
-    setErrors({});
-  }
+    setStatus('sending');
+    try {
+      await sendMessage(values);
+      setStatus('sent');
+      setValues(INITIAL);
+      setTouched({});
+      setErrors({});
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  const errorCount = Object.values(errors).filter(Boolean).length;
 
   return (
-    <section className="contact sheet-frame">
-      <h2>Contact</h2>
-      <p className="section-lede">Have a question or want to collaborate? Send a message.</p>
+    <section className="page container" aria-labelledby="contact-title">
+      <h1 id="contact-title">Contact</h1>
+      <p className="lead">Have a question or want to collaborate? Send a message.</p>
 
-      <form className="contact-form" noValidate onSubmit={handleSubmit}>
-        <div className={`form-field ${errors.name ? 'has-error' : ''}`}>
-          <label htmlFor="name">Name <span aria-hidden="true">*</span></label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={values.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            autoComplete="name"
-            required
-            aria-required="true"
-            aria-invalid={Boolean(errors.name)}
-            aria-describedby="nameError"
-          />
-          {/* aria-describedby ties the input to this span, so a screen
-              reader announces the error when the field receives focus —
-              not just visually, next to it. */}
-          <span className="field-error" id="nameError">{errors.name}</span>
+      <form className="form" onSubmit={handleSubmit} noValidate>
+        <FormField
+          label="Name"
+          name="name"
+          autoComplete="name"
+          value={values.name}
+          error={errors.name}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          inputRef={refs.name}
+        />
+        <FormField
+          label="Email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          value={values.email}
+          error={errors.email}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          inputRef={refs.email}
+        />
+        <FormField
+          label="Message"
+          name="message"
+          multiline
+          hint="At least 20 characters."
+          value={values.message}
+          error={errors.message}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          inputRef={refs.message}
+        />
+
+        <div className="form__actions">
+          <button type="submit" className="btn btn--primary" disabled={status === 'sending'}>
+            {status === 'sending' ? 'Sending…' : 'Send message'}
+          </button>
+          <p className="form__status" role="status" aria-live="polite">
+            {status === 'sent' && "Message sent. I'll reply as soon as I can."}
+            {status === 'error' && 'Your message could not be sent. Check your connection and try again.'}
+            {status === 'idle' && errorCount > 0 && `Fix ${errorCount} ${errorCount === 1 ? 'field' : 'fields'} to continue.`}
+          </p>
         </div>
-
-        <div className={`form-field ${errors.email ? 'has-error' : ''}`}>
-          <label htmlFor="email">Email <span aria-hidden="true">*</span></label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={values.email}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            autoComplete="email"
-            required
-            aria-required="true"
-            aria-invalid={Boolean(errors.email)}
-            aria-describedby="emailError"
-          />
-          <span className="field-error" id="emailError">{errors.email}</span>
-        </div>
-
-        <div className={`form-field ${errors.message ? 'has-error' : ''}`}>
-          <label htmlFor="message">Message <span aria-hidden="true">*</span></label>
-          <textarea
-            id="message"
-            name="message"
-            rows="5"
-            value={values.message}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            required
-            aria-required="true"
-            aria-invalid={Boolean(errors.message)}
-            aria-describedby="messageError"
-          />
-          <span className="field-error" id="messageError">{errors.message}</span>
-        </div>
-
-        <button type="submit" className="submit-btn">Send message</button>
-
-        {status === 'success' && (
-          <p className="form-status is-success" role="status">Thanks! Your message has been sent.</p>
-        )}
-        {status === 'error' && (
-          <p className="form-status" role="status">Please fix the errors above and try again.</p>
-        )}
       </form>
+
+      {SITE.links.email && (
+        <p className="muted">
+          Prefer email? Write to <a href={`mailto:${SITE.links.email}`}>{SITE.links.email}</a>.
+        </p>
+      )}
     </section>
   );
 }

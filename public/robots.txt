@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://developer-portfolio-tina-daf2.vercel.app/sitemap.xml

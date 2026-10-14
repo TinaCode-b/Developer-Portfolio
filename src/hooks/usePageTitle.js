@@ -1,11 +1,15 @@
 import { useEffect } from 'react';
 
-// A tiny reusable hook: give it a title, it keeps the browser tab's
-// <title> in sync. Screen readers announce the document title when it
-// changes, so this is also what tells assistive tech "the page changed"
-// in a single-page app where there's no real page navigation.
-export default function usePageTitle(title) {
+const DEFAULT_TITLE = 'Ernestina | Web developer';
+
+// Sets the document title and meta description for the current page so that
+// screen readers, browser tabs, and search engines all see page-specific text.
+export default function usePageTitle(title, description) {
   useEffect(() => {
-    document.title = title ? `${title} — Personal Developer Portfolio` : 'Personal Developer Portfolio';
-  }, [title]);
+    document.title = title ? `${title} | Ernestina` : DEFAULT_TITLE;
+    if (description) {
+      const meta = document.querySelector('meta[name="description"]');
+      if (meta) meta.setAttribute('content', description);
+    }
+  }, [title, description]);
 }

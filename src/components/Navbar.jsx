@@ -1,60 +1,105 @@
-import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import MobileDrawer from './MobileDrawer.jsx';
+import { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { SITE } from '../data/site.js';
 
-// `links` is a prop: an array passed in from App.jsx. Navbar doesn't
-// know or care what the links are — that makes it reusable.
-export default function Navbar({ links }) {
-  // isOpen is component state. Calling setIsOpen triggers a re-render
-  // with the new value, which is how the drawer actually opens/closes.
-  const [isOpen, setIsOpen] = useState(false);
+const LINKS = [
+  { to: '/', label: 'Home', end: true },
+  { to: '/projects', label: 'Projects' },
+  { to: '/contact', label: 'Contact' },
+];
 
-  // Keyboard users expect Escape to close an open overlay — this is a
-  // WCAG 2.1.2 (No Keyboard Trap) / common expectation, not just a nicety.
+export default function Navbar() {
+  const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  const toggleRef = useRef(null);
+  const navRef = useRef(null);
+
+  // Close the drawer after navigating.
   useEffect(() => {
-    if (!isOpen) return;
-    function handleKeyDown(event) {
-      if (event.key === 'Escape') setIsOpen(false);
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+    setOpen(false);
+  }, [pathname]);
+
+  // While the drawer is open: Escape closes it, page scroll is locked,
+  // and Tab cycles between the menu button and the links.
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        toggleRef.current?.focus();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const items = [toggleRef.current, ...navRef.current.querySelectorAll('a')];
+      const firstEl = items[0];
+      const lastEl = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === firstEl) {
+        e.preventDefault();
+        lastEl.focus();
+      } else if (!e.shiftKey && document.activeElement === lastEl) {
+        e.preventDefault();
+        firstEl.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    document.body.classList.add('no-scroll');
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.body.classList.remove('no-scroll');
+    };
+  }, [open]);
 
   return (
     <header className="site-header">
-      <div className="sheet-frame">
-        <NavLink to="/" className="wordmark">PDP</NavLink>
-
-        <nav className="site-nav" aria-label="Primary">
-          {links.map((link) => (
-            // NavLink automatically adds an "active" class when its
-            // `to` matches the current URL — that's how we highlight
-            // the current page without writing that logic ourselves.
-            <NavLink
-              key={link.to}
-              to={link.to}
-              className={({ isActive }) => (isActive ? 'is-active' : undefined)}
-              end={link.to === '/'}
-            >
-              {link.label}
-            </NavLink>
-          ))}
-        </nav>
+      <div className="container site-header__inner">
+        <Link to="/" className="brand">
+          {SITE.name}
+        </Link>
 
         <button
+          ref={toggleRef}
+          type="button"
           className="nav-toggle"
-          aria-label={isOpen ? 'Close menu' : 'Open menu'}
-          aria-expanded={isOpen}
-          aria-controls="mobileDrawer"
-          onClick={() => setIsOpen((prev) => !prev)}
+          aria-expanded={open}
+          aria-controls="primary-nav"
+          onClick={() => setOpen((o) => !o)}
         >
-          <span></span>
-          <span></span>
-          <span></span>
+          <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+          </svg>
         </button>
-      </div>
 
-      <MobileDrawer links={links} isOpen={isOpen} onClose={() => setIsOpen(false)} />
+        <div
+          className={`nav-backdrop${open ? ' is-open' : ''}`}
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+
+        <nav id="primary-nav" ref={navRef} aria-label="Primary" className={`nav${open ? ' is-open' : ''}`}>
+          <ul className="nav__list">
+            {LINKS.map(({ to, label, end }) => (
+              <li key={to}>
+                <NavLink to={to} end={end} className="nav__link">
+                  {label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
     </header>
   );
 }
