@@ -1,4 +1,5 @@
 import SkillCard from '../components/SkillCard.jsx';
+import usePageTitle from '../hooks/usePageTitle.js';
 
 // Plain data, not JSX. Keeping it separate from the markup means
 // adding a 6th skill is a one-line change, not a copy-pasted block.
@@ -11,15 +12,17 @@ const SKILLS = [
 ];
 
 export default function Home() {
+  usePageTitle(null);
+
   return (
     <>
       <section className="hero sheet-frame">
-        <span className="hero-kicker">Sprint 03 · React rebuild</span>
+        <span className="hero-kicker">Web Developer · KNUST</span>
         <h1 className="hero-title">
           Personal <span className="accent">Developer</span> Portfolio
         </h1>
         <p className="hero-sub">
-          Now rebuilt in React: components, state, routing, and a live feed
+          Built in React: components, state, routing, and a live feed
           of my GitHub projects — instead of one static HTML file.
         </p>
       </section>
@@ -27,9 +30,15 @@ export default function Home() {
       <section className="about sheet-frame">
         <h2>About</h2>
         <p>
-          I'm learning to build for the web from first principles, and this
-          page is proof of that progression — it started as plain HTML and
-          CSS, and is now componentized React with client-side routing.
+          I'm Ernestina — a web developer and student at KNUST (Kwame
+          Nkrumah University of Science and Technology). I'm learning to
+          build for the web from first principles, and this page is proof
+          of that progression.
+        </p>
+        <p>
+          It started as plain semantic HTML and CSS, and is now
+          componentized React with client-side routing, a live GitHub feed,
+          and production polish — accessibility, SEO, and performance.
         </p>
       </section>
 

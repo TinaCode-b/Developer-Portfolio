@@ -17,7 +17,11 @@ export default function MobileDrawer({ links, isOpen, onClose }) {
         aria-hidden={!isOpen}
       >
         {links.map((link) => (
-          <NavLink key={link.to} to={link.to} onClick={onClose}>
+          // When the drawer is closed it's still in the DOM (just slid
+          // off-screen via CSS), so without this, keyboard users could
+          // tab into links they can't see. tabIndex={-1} removes them
+          // from the tab order until the drawer is actually open.
+          <NavLink key={link.to} to={link.to} onClick={onClose} tabIndex={isOpen ? 0 : -1}>
             {link.label}
           </NavLink>
         ))}

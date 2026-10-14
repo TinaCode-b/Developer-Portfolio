@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import ProjectCard from '../components/ProjectCard.jsx';
+import usePageTitle from '../hooks/usePageTitle.js';
 
 const GITHUB_USERNAME = 'TinaCode-b';
 
 export default function Projects() {
+  usePageTitle('Projects');
+
   // Three pieces of state: the data itself, whether we're still loading,
   // and whether something went wrong. Each one drives a different part
   // of the UI below.
@@ -44,16 +47,27 @@ export default function Projects() {
         Live from my GitHub — pulled dynamically via the GitHub REST API.
       </p>
 
-      {isLoading && <p className="projects-status">Loading repositories…</p>}
+      {/* role="status" + aria-live="polite" means a screen reader
+          announces this text whenever it changes, even though focus
+          stays wherever the user already was — important here because
+          fetching happens automatically, with no user-initiated action
+          like a button click to anchor the announcement to. */}
+      {isLoading && (
+        <p className="projects-status" role="status" aria-live="polite">
+          Loading repositories…
+        </p>
+      )}
 
       {error && (
-        <p className="projects-status is-error">
+        <p className="projects-status is-error" role="status" aria-live="polite">
           Couldn't load projects right now ({error}).
         </p>
       )}
 
       {!isLoading && !error && repos.length === 0 && (
-        <p className="projects-status">No public repositories found.</p>
+        <p className="projects-status" role="status" aria-live="polite">
+          No public repositories found.
+        </p>
       )}
 
       <div className="projects-grid">

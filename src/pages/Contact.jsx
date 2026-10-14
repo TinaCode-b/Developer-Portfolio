@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import usePageTitle from '../hooks/usePageTitle.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -17,6 +18,8 @@ function validate(values) {
 }
 
 export default function Contact() {
+  usePageTitle('Contact');
+
   // One state object for all three fields, one for their errors,
   // one for the submit status message.
   const [values, setValues] = useState({ name: '', email: '', message: '' });
@@ -59,7 +62,7 @@ export default function Contact() {
 
       <form className="contact-form" noValidate onSubmit={handleSubmit}>
         <div className={`form-field ${errors.name ? 'has-error' : ''}`}>
-          <label htmlFor="name">Name</label>
+          <label htmlFor="name">Name <span aria-hidden="true">*</span></label>
           <input
             type="text"
             id="name"
@@ -68,12 +71,19 @@ export default function Contact() {
             onChange={handleChange}
             onBlur={handleBlur}
             autoComplete="name"
+            required
+            aria-required="true"
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby="nameError"
           />
-          <span className="field-error">{errors.name}</span>
+          {/* aria-describedby ties the input to this span, so a screen
+              reader announces the error when the field receives focus —
+              not just visually, next to it. */}
+          <span className="field-error" id="nameError">{errors.name}</span>
         </div>
 
         <div className={`form-field ${errors.email ? 'has-error' : ''}`}>
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">Email <span aria-hidden="true">*</span></label>
           <input
             type="email"
             id="email"
@@ -82,12 +92,16 @@ export default function Contact() {
             onChange={handleChange}
             onBlur={handleBlur}
             autoComplete="email"
+            required
+            aria-required="true"
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby="emailError"
           />
-          <span className="field-error">{errors.email}</span>
+          <span className="field-error" id="emailError">{errors.email}</span>
         </div>
 
         <div className={`form-field ${errors.message ? 'has-error' : ''}`}>
-          <label htmlFor="message">Message</label>
+          <label htmlFor="message">Message <span aria-hidden="true">*</span></label>
           <textarea
             id="message"
             name="message"
@@ -95,8 +109,12 @@ export default function Contact() {
             value={values.message}
             onChange={handleChange}
             onBlur={handleBlur}
+            required
+            aria-required="true"
+            aria-invalid={Boolean(errors.message)}
+            aria-describedby="messageError"
           />
-          <span className="field-error">{errors.message}</span>
+          <span className="field-error" id="messageError">{errors.message}</span>
         </div>
 
         <button type="submit" className="submit-btn">Send message</button>

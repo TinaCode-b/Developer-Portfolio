@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import MobileDrawer from './MobileDrawer.jsx';
 
@@ -8,6 +8,17 @@ export default function Navbar({ links }) {
   // isOpen is component state. Calling setIsOpen triggers a re-render
   // with the new value, which is how the drawer actually opens/closes.
   const [isOpen, setIsOpen] = useState(false);
+
+  // Keyboard users expect Escape to close an open overlay — this is a
+  // WCAG 2.1.2 (No Keyboard Trap) / common expectation, not just a nicety.
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') setIsOpen(false);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   return (
     <header className="site-header">
@@ -32,7 +43,7 @@ export default function Navbar({ links }) {
 
         <button
           className="nav-toggle"
-          aria-label="Open menu"
+          aria-label={isOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={isOpen}
           aria-controls="mobileDrawer"
           onClick={() => setIsOpen((prev) => !prev)}

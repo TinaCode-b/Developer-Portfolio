@@ -4,7 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Personal Developer Portfolio</title>
+  <meta name="description" content="Personal developer portfolio built with React — semantic foundations, Flexbox and Grid layouts, and live GitHub projects, deployed to production." />
+  <meta name="theme-color" content="#5a31f4" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="canonical" href="https://developer-portfolio-tina-daf2.vercel.app/" />
+
+  <!-- Open Graph (Facebook, LinkedIn, Slack previews) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Personal Developer Portfolio" />
+  <meta property="og:description" content="A React portfolio covering Hero, About, Skills, Projects, and Contact — with live GitHub project data." />
+  <meta property="og:image" content="https://developer-portfolio-tina-daf2.vercel.app/og-image.png" />
+  <meta property="og:url" content="https://developer-portfolio-tina-daf2.vercel.app/" />
+
+  <!-- Twitter/X card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Personal Developer Portfolio" />
+  <meta name="twitter:description" content="A React portfolio covering Hero, About, Skills, Projects, and Contact — with live GitHub project data." />
+  <meta name="twitter:image" content="https://developer-portfolio-tina-daf2.vercel.app/og-image.png" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- The Projects page fetches this on mount; preconnecting here lets
+       the browser open the connection (DNS + TLS) ahead of time instead
+       of waiting until the fetch() call actually fires. -->
+  <link rel="preconnect" href="https://api.github.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
